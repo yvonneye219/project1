@@ -4,7 +4,8 @@ import javax.swing.*;
 
 public class HTMLreader implements ActionListener {
     private JFrame mainFrame;
-    private JPanel controlPanel; 
+    private JLabel statusLabel;
+    private JPanel controlPanel;
     private JMenuBar mb;
     private JMenu file, edit, help;
     private JMenuItem cut, copy, paste, selectAll;
@@ -65,9 +66,12 @@ public class HTMLreader implements ActionListener {
         TA.setEditable(false);
         TA.setLineWrap(false);
         TA.setBorder(BorderFactory.createTitledBorder("Links"));
-
+        mainFrame.add(new JScrollPane(TA));
 
         controlPanel = new JPanel(new FlowLayout());
+        statusLabel = new JLabel("Ready.");
+        controlPanel.add(statusLabel);
+        mainFrame.add(controlPanel);
 
         mainFrame.addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent windowEvent) {
@@ -79,25 +83,17 @@ public class HTMLreader implements ActionListener {
     }
 
     private void showEventDemo() {
-        JButton okButton = new JButton("OK");
-        JButton submitButton = new JButton("Submit");
-        JButton cancelButton = new JButton("Cancel");
+        JButton goButton = new JButton("Go");                 // >>> ADD
 
-        okButton.setActionCommand("OK");
-        submitButton.setActionCommand("Submit");
-        cancelButton.setActionCommand("Cancel");
+        goButton.setActionCommand("Go");
 
-        okButton.addActionListener(new ButtonClickListener());
-        submitButton.addActionListener(new ButtonClickListener());
-        cancelButton.addActionListener(new ButtonClickListener());
+        goButton.addActionListener(new ButtonClickListener());
 
-
-        controlPanel.add(okButton);
-        controlPanel.add(submitButton);
-        controlPanel.add(cancelButton);
+        controlPanel.add(goButton);
 
         mainFrame.setVisible(true);
     }
+
 
     @Override
     public void actionPerformed(ActionEvent e) {
@@ -114,7 +110,16 @@ public class HTMLreader implements ActionListener {
     private class ButtonClickListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
             String command = e.getActionCommand();
-            JOptionPane.showMessageDialog(mainFrame, command + " Button clicked.");
+
+            if (command.equals("OK")) {
+                statusLabel.setText("Ok Button clicked.");
+            } else if (command.equals("Submit")) {
+                statusLabel.setText("Submit Button clicked.");
+            } else if (command.equals("Go")) {
+                statusLabel.setText("Go Button clicked.");
+            } else {
+                statusLabel.setText("Cancel Button clicked.");
+            }
         }
     }
 }
