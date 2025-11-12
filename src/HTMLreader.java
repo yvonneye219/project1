@@ -2,6 +2,13 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.ArrayList;
+
+
 public class HTMLreader implements ActionListener {
     private JFrame mainFrame;
     private JLabel statusLabel;
@@ -21,9 +28,9 @@ public class HTMLreader implements ActionListener {
         prepareGUI();
     }
 
+
     public static void main(String[] args) {
-        HTMLreader swingControlDemo = new HTMLreader();
-        swingControlDemo.showEventDemo();
+        new HTMLreader();
     }
 
     private void prepareGUI() {
@@ -124,11 +131,64 @@ public class HTMLreader implements ActionListener {
                 statusLabel.setText("Ok Button clicked.");
             } else if (command.equals("Submit")) {
                 statusLabel.setText("Submit Button clicked.");
+
             } else if (command.equals("Go")) {
                 statusLabel.setText("Go Button clicked.");
-            } else {
+                //grab link
+                ArrayList<String> links = new ArrayList<>();
+
+                try {
+                    System.out.println("hello");
+                    URL url = new URL("https://www.milton.edu/");
+                    URLConnection conn = url.openConnection();
+                    conn.setRequestProperty("User-Agent", "Mozilla/5.0");
+
+                    BufferedReader reader = new BufferedReader(
+                            new InputStreamReader(conn.getInputStream())
+                    );
+
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        // System.out.println(line);
+                        if (line.contains("href=")) {
+                            int start = line.indexOf("href=") + 5;
+                            char quoteType = line.charAt(start);
+                            start = start + 1;
+
+                            int end = -1;
+                            if (quoteType == '"') {
+                                end = line.indexOf("\"", start);
+                            } else if (quoteType == '\'') {
+                                end = line.indexOf("'", start);
+                            } else {
+                                end = line.indexOf("\"", start);                 }
+
+                            while (start < line.length() && line.charAt(start) == ' ') {
+                                start++;
+                            }
+                            if (end > start && end != -1) {
+                                String link = line.substring(start, end).trim();
+
+
+                                    System.out.println(link);
+                                }
+                            }
+                        }
+
+                    reader.close();
+
+                } catch (Exception ex) {
+                    System.out.println(ex);
+                }
+
+
+
+
+        } else {
                 statusLabel.setText("Cancel Button clicked.");
             }
         }
     }
+
+
 }
