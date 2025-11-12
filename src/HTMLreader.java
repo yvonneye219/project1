@@ -30,7 +30,7 @@ public class HTMLreader implements ActionListener {
         mainFrame = new JFrame("HTML Reader");
         mainFrame.setSize(WIDTH, HEIGHT);
 
-        mainFrame.setLayout(new GridLayout(3, 1, 8, 8));
+        mainFrame.setLayout(new BorderLayout(8, 8));
 
         cut = new JMenuItem("cut");
         copy = new JMenuItem("copy");
@@ -54,24 +54,33 @@ public class HTMLreader implements ActionListener {
         mb.add(help);
         mainFrame.setJMenuBar(mb);
 
-        urlField = new JTextField("https://www.milton.edu/");
-        urlField.setBorder(BorderFactory.createTitledBorder("URL"));
-        mainFrame.add(urlField);
+        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 8));
 
-        searchField = new JTextField();
+        urlField = new JTextField("https://www.milton.edu/", 35);
+        urlField.setBorder(BorderFactory.createTitledBorder("URL"));
+        topPanel.add(urlField);
+
+        searchField = new JTextField(18);
         searchField.setBorder(BorderFactory.createTitledBorder("Search term"));
-        mainFrame.add(searchField);
+        topPanel.add(searchField);
+
+        JButton goButton = new JButton("Go");
+        goButton.setActionCommand("Go");
+        goButton.addActionListener(new ButtonClickListener());
+        topPanel.add(goButton);
+
+        mainFrame.add(topPanel, BorderLayout.NORTH);
 
         TA = new JTextArea();
         TA.setEditable(false);
         TA.setLineWrap(false);
         TA.setBorder(BorderFactory.createTitledBorder("Links"));
-        mainFrame.add(new JScrollPane(TA));
+        mainFrame.add(new JScrollPane(TA), BorderLayout.CENTER);
 
-        controlPanel = new JPanel(new FlowLayout());
+        controlPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 8));
         statusLabel = new JLabel("Ready.");
         controlPanel.add(statusLabel);
-        mainFrame.add(controlPanel);
+        mainFrame.add(controlPanel, BorderLayout.SOUTH);
 
         mainFrame.addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent windowEvent) {
