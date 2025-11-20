@@ -70,7 +70,7 @@ public class HTMLreader implements ActionListener {
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 8));
 
         // URL input with a default value
-        urlField = new JTextField("https://www.milton.edu/", 35);
+        urlField = new JTextField("", 35);
         urlField.setBorder(BorderFactory.createTitledBorder("URL"));
         topPanel.add(urlField);
 
@@ -133,59 +133,72 @@ public class HTMLreader implements ActionListener {
                 statusLabel.setText("Submit Button clicked.");
 
             } else if (command.equals("Go")) {
+                // Actual functionality: fetch and display links
                 statusLabel.setText("Fetching links...");
                 TA.setText("");
-
+                // Get URL and search terms from the text fields
                 String urlText = urlField.getText().trim();
+                // Split search field into individual words (space-separated)
                 String[] searchTerms = searchField.getText().trim().toLowerCase().split("\\s+");
 
+                // Store all matched links here
                 ArrayList<String> links = new ArrayList<>();
 
                 try {
+                    // Open connection to the URL
                     URL url = new URL(urlText);
                     URLConnection conn = url.openConnection();
+                    // Set a User-Agent so some sites don’t reject the connection
                     conn.setRequestProperty("User-Agent", "Mozilla/5.0");
-
+                    // Wrap the input stream in a BufferedReader to read line by line
                     BufferedReader reader = new BufferedReader(
                             new InputStreamReader(conn.getInputStream())
                     );
 
                     String line;
+                    // Read the HTML page line by line
                     while ((line = reader.readLine()) != null) {
 
-                        int index = 0;  // where we are in this line
+                        int index = 0;  // current position in this line
 
-                        // keep looking for more "href=" in the same line
+                        // Look for every "href=" occurrence in the same line
                         while ((index = line.indexOf("href=", index)) != -1) {
 
-                            int start = index + 5;          // move past 'href='
+                            // Move past "href="
+                            int start = index + 5;
                             if (start >= line.length()) break;
 
+                            // The character right after href= should be a quote (" or ')
                             char quoteType = line.charAt(start);
                             start++;
 
                             int end;
                             if (quoteType == '"') {
+                                // Try finding the closing double quote
                                 end = line.indexOf("\"", start);
                             } else if (quoteType == '\'') {
+                                // Find the closing single quote
                                 end = line.indexOf("'", start);
                             } else {
+                                // Fallback: search for double quote if quoteType is weird
                                 end = line.indexOf("\"", start);
                             }
 
+                            // Skip any spaces at the start of the link
                             while (start < line.length() && line.charAt(start) == ' ')
                                 start++;
 
+                            // Ensures that only extract if we found a valid end
                             if (end > start && end != -1) {
+                                // Extract the link substring
                                 String link = line.substring(start, end).trim();
 
                                 boolean matches = false;
-
-// If user left search blank → match everything
+                                // If user left search blank → match all links
                                 if (searchTerms.length == 0 || (searchTerms.length == 1 && searchTerms[0].isEmpty())) {
                                     matches = true;
                                 } else {
-                                    // check if link contains ANY of the search terms
+                                    // Otherwise, check if the link contains any of the search terms
                                     for (String term : searchTerms) {
                                         if (link.toLowerCase().contains(term)) {
                                             matches = true;
@@ -193,18 +206,19 @@ public class HTMLreader implements ActionListener {
                                         }
                                     }
                                 }
-
+                                // If link passes the search filter, add and display it
                                 if (matches) {
                                     links.add(link);
                                     TA.append(link + "\n");
                                 }
                             }
 
-                            // move index forward so we can find the next href in this line
+                            // Move index forward to search for the next href
                             if (end == -1) {
+                                // No closing quote found; break to avoid infinite loop
                                 break;
                             } else {
-                                index = end;
+                                index = end; // continue searching after this link
                             }
                         }
                     }
@@ -212,7 +226,7 @@ public class HTMLreader implements ActionListener {
 
 
                     reader.close();
-
+                    // If no links matched, show a friendly message
                     if (links.isEmpty()) {
                         String combinedTerms = String.join(" ", searchTerms);
                         TA.setText("No results found for: \"" + combinedTerms + "\"\nTry again.");
@@ -220,9 +234,11 @@ public class HTMLreader implements ActionListener {
                         return;
                     }
 
+                    // Otherwise, show how many links were found
                     statusLabel.setText("Done. " + links.size() + " link(s) found.");
 
                 } catch (Exception ex) {
+                    // Any error (bad URL, network issue, etc.)
                     statusLabel.setText("Invalid URL. Try again.");
                     TA.setText("Error: could not load the URL.\nPlease check the address and try again.");
                 }
